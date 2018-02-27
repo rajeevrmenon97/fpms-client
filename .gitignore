@@ -9,3 +9,6 @@ pyvenv.cfg
 .venv
 pip-selfcheck.json
 nbis
+*.pyc
+*.xyt
+*.bmp
