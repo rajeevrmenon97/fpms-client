@@ -10,6 +10,7 @@ all: $(TARGET)
 
 $(TARGET): $(TARGET).c
 	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c $(FTRSCANAPI_DLIB) $(LIBUSB_DLIB)
+	mkdir temp fpData
 
 clean:
-	rm -f $(TARGET)
+	rm -rf $(TARGET) *.bmp *.xyt *.pyc temp fpData
