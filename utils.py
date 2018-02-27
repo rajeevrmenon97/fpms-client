@@ -1,6 +1,7 @@
 #!bin/python
 import pymysql.cursors
 import subprocess
+from subprocess import STDOUT
 from pathlib import Path
 import sys
 
@@ -48,12 +49,13 @@ class fpms:
 
     def readFingerprint(self, fileName):
         try:
-            result = subprocess.check_output(['./scanner', fileName]).decode('unicode_escape').rstrip()
-        except:
-            result = "Error!"
+            result = subprocess.check_output(['./scanner', fileName])
+        except subprocess.CalledProcessError as exc:
+            result = exc.output
+        result = result.decode('unicode_escape').rstrip()
         print(result)
 
 if __name__ == '__main__':
     obj = fpms()
-    #obj.register("10101","Rajeev",8547088868,"r2m@gmail.com", "f.xyt")
-    obj.readFingerprint("f.bmp")
+    obj.register("10101","Rajeev",8547088868,"r2m@gmail.com", "f.xyt")
+    #obj.readFingerprint("f.bmp")
