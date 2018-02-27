@@ -1,5 +1,8 @@
+#!bin/python
 import pymysql.cursors
 import subprocess
+from pathlib import Path
+import sys
 
 
 class fpms:
@@ -9,6 +12,12 @@ class fpms:
         self.score = 0
 
     def register(self, id_no, name, phone, email, fpTemplate):
+
+        templatePath = Path(fpTemplate)
+        if templatePath.is_file() is False:
+            print("Cannot find fingerprint template!")
+            return
+
         connection = pymysql.connect(host='localhost',
                              user='root',
                              password='ssl',
@@ -30,17 +39,21 @@ class fpms:
                 sql = "INSERT INTO `registered` (`serial_no`, `name`, `id_no`, `phone_no`, `email_id`, `fpData`) VALUES (%s, %s, %s, %s, %s, %s)"
                 cursor.execute(sql, (sno, name, id_no, phone, email, blob, ))
             connection.commit()
+
+        except:
+            print("Error inserting into db")
+
         finally:
             connection.close()
 
     def readFingerprint(self, fileName):
-        result = subprocess.check_output(['./scanner', fileName])
-        
-
-
-
-
+        try:
+            result = subprocess.check_output(['./scanner', fileName]).decode('unicode_escape').rstrip()
+        except:
+            result = "Error!"
+        print(result)
 
 if __name__ == '__main__':
     obj = fpms()
-    obj.register("10101","Rajeev",8547088868,"r2m@gmail.com", "f.xyt")
+    #obj.register("10101","Rajeev",8547088868,"r2m@gmail.com", "f.xyt")
+    obj.readFingerprint("f.bmp")
