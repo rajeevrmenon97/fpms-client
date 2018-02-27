@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("Image size is %d\n", ImageSize.nImageSize);
+		//printf("Image size is %d\n", ImageSize.nImageSize);
 		pBuffer = (unsigned char *)malloc( ImageSize.nImageSize );
 		//printf("Please put your finger on the scanner:\n");
 		while(1)
