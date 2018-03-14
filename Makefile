@@ -13,4 +13,4 @@ $(TARGET): $(TARGET).c
 	mkdir temp fpData
 
 clean:
-	rm -rf $(TARGET) *.bmp *.xyt *.pyc temp fpData
+	rm -rf $(TARGET) *.wsq *.bmp *.xyt *.pyc temp fpData *.brw *.dm *.hcm *.lcm *.lfm *.min *.qm
