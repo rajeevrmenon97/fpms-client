@@ -111,7 +111,8 @@ class fpms:
         binary = './scanner'
         arguments = ["temp/" + fileName]
         result = self.executeBinary(binary, arguments)
-        print(result)
+        if result is not '':
+            print(result)
 
     def compressBMP(self, fileName):
         binary = './nbis/bin/cwsq'
@@ -154,7 +155,6 @@ class fpms:
                     break
 
     def readFingerprint(self):
-        #print("Place your finger")
         self.scanFingerprint("temp.bmp")
         self.compressBMP("temp/temp.bmp")
         self.minutiaeDetect("temp/temp.wsq")
@@ -167,4 +167,3 @@ if __name__ == '__main__':
     while o.templateLineCount < 35:
         o.readFingerprint()
     o.findMatch('temp/temp.xyt')
-    print(o.score)
