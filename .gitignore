@@ -13,3 +13,11 @@ nbis
 *.xyt
 *.bmp
 scanner
+*.wsq
+*.brw
+*.dm
+*.hcm
+*.lcm
+*.lfm
+*.min
+*.qm
