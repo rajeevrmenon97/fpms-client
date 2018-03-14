@@ -82,9 +82,45 @@ class fpms:
             self.connection.close()
 
     def readFingerprint(self, fileName):
+        binary = './scanner'
+        arguments = ["temp/" + fileName]
+        cmd = [binary]
+        cmd.extend(arguments)
         try:
-            result = subprocess.check_output(['./scanner', fileName])
+            result = subprocess.check_output(cmd)
         except subprocess.CalledProcessError as exc:
             result = exc.output
         result = result.decode('unicode_escape').rstrip()
         print(result)
+
+    def compressBMP(self, fileName):
+        binary = './nbis/bin/cwsq'
+        arguments = ["2.25","wsq",fileName, "-raw_in", "320,480,8"]
+        cmd = [binary]
+        cmd.extend(arguments)
+        try:
+            result = subprocess.check_output(cmd)
+        except subprocess.CalledProcessError as exc:
+            result = exc.output
+        result = result.decode('unicode_escape').rstrip()
+        print(result)
+
+    def minutiaeDetect(self, fileName):
+        binary = './nbis/bin/mindtct'
+        arguments = ["-m1",fileName, fileName[:-4]]
+        cmd = [binary]
+        cmd.extend(arguments)
+        try:
+            result = subprocess.check_output(cmd)
+        except subprocess.CalledProcessError as exc:
+            result = exc.output
+        result = result.decode('unicode_escape').rstrip()
+        print(result)
+
+
+if __name__ == '__main__':
+    o = fpms()
+    o.getFingerprintData()
+    o.readFingerprint("temp.bmp")
+    o.compressBMP("temp/temp.bmp")
+    o.minutiaeDetect("temp/temp.wsq")
