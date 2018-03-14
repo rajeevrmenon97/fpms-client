@@ -20,6 +20,7 @@ class fpms:
         self.gallery = ""
         self.score = -1
         self.connection = None
+        self.matchedID = ""
 
     def connectDb(self):
         try:
@@ -124,16 +125,25 @@ class fpms:
             print(result)
 
     def matchFingerprints(self, templateOne, templateTwo):
+        self.score = 0
         binary = './nbis/bin/bozorth3'
         arguments = [templateOne, templateTwo]
         result = self.executeBinary(binary, arguments)
         if isInt(result):
-            print("Matching Algorithm success!")
             self.score = int(result)
-            print(self.score)
         else:
-            print("Matching error!")
             print(result)
+
+    def findMatch(self, fileName):
+        flag = False;
+        indir = './fpData'
+        for root, dirs, filenames in os.walk(indir):
+            for f in filenames:
+                self.matchFingerprints(fileName, 'fpData/' + f)
+                if self.score > 40:
+                    self.matchedID = f[:-4]
+                    print(self.matchedID)
+                    break
 
 
 if __name__ == '__main__':
@@ -143,3 +153,4 @@ if __name__ == '__main__':
     o.compressBMP("temp/temp.bmp")
     o.minutiaeDetect("temp/temp.wsq")
     o.matchFingerprints("temp/temp.xyt","fpData/B150115CS.xyt")
+    o.findMatch("temp/temp.xyt")
