@@ -13,6 +13,12 @@ def isInt(s):
     except ValueError:
         return False
 
+def getNumberOfLines(fileName):
+    with open(fileName) as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
+
 class fpms:
 
     def __init__(self):
@@ -21,6 +27,7 @@ class fpms:
         self.score = -1
         self.connection = None
         self.matchedID = ""
+        self.templateLineCount = 0
 
     def connectDb(self):
         try:
@@ -52,6 +59,7 @@ class fpms:
 
         except Exception as e:
             print('Error getting fingerprint Data! \n {!r}, errno is {}'.format(e, e.args[0]))
+            exit()
 
         finally:
             self.connection.close()
@@ -61,7 +69,7 @@ class fpms:
         templatePath = Path(fpTemplate)
         if templatePath.is_file() is False:
             print("Cannot find fingerprint template!")
-            return
+            exit()
 
         self.connectDb()
 
@@ -84,6 +92,7 @@ class fpms:
 
         except Exception as e:
             print('Error inserting into DB!\n {!r}, errno is {}'.format(e, e.args[0]))
+            exit()
 
         finally:
             self.connection.close()
@@ -98,7 +107,7 @@ class fpms:
         result = result.decode('unicode_escape').rstrip()
         return result
 
-    def readFingerprint(self, fileName):
+    def scanFingerprint(self, fileName):
         binary = './scanner'
         arguments = ["temp/" + fileName]
         result = self.executeBinary(binary, arguments)
@@ -108,21 +117,19 @@ class fpms:
         binary = './nbis/bin/cwsq'
         arguments = ["2.25","wsq",fileName, "-raw_in", "320,480,8"]
         result = self.executeBinary(binary, arguments)
-        if result is '':
-            print("Compression success!")
-        else:
+        if result is not '':
             print("Compression error!")
             print(result)
+            exit()
 
     def minutiaeDetect(self, fileName):
         binary = './nbis/bin/mindtct'
         arguments = ["-m1",fileName, fileName[:-4]]
         result = self.executeBinary(binary, arguments)
-        if result is '':
-            print("Detection success!")
-        else:
+        if result is not '':
             print("Detection error!")
             print(result)
+            exit()
 
     def matchFingerprints(self, templateOne, templateTwo):
         self.score = 0
@@ -133,6 +140,7 @@ class fpms:
             self.score = int(result)
         else:
             print(result)
+            exit()
 
     def findMatch(self, fileName):
         flag = False;
@@ -145,12 +153,18 @@ class fpms:
                     print(self.matchedID)
                     break
 
+    def readFingerprint(self):
+        #print("Place your finger")
+        self.scanFingerprint("temp.bmp")
+        self.compressBMP("temp/temp.bmp")
+        self.minutiaeDetect("temp/temp.wsq")
+        self.templateLineCount = getNumberOfLines("temp/temp.xyt")
+
 
 if __name__ == '__main__':
     o = fpms()
     o.getFingerprintData()
-    o.readFingerprint("temp.bmp")
-    o.compressBMP("temp/temp.bmp")
-    o.minutiaeDetect("temp/temp.wsq")
-    o.matchFingerprints("temp/temp.xyt","fpData/B150115CS.xyt")
-    o.findMatch("temp/temp.xyt")
+    while o.templateLineCount < 35:
+        o.readFingerprint()
+    o.findMatch('temp/temp.xyt')
+    print(o.score)
