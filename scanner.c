@@ -117,7 +117,7 @@ int write_bmp_file(unsigned char *pImage, int width, int height, char *fileName)
 	}
 	fwrite( (void *)pDIBData, 1, width * height, fp );
 	fclose(fp);
-	printf("Fingerprint image is written to file: %s.\n",fileName);
+	//printf("Fingerprint image is written to file: %s.\n",fileName);
 	free( pDIBData );
 	free( pDIBHeader );
 	return 0;
