@@ -6,13 +6,19 @@ from pathlib import Path
 import sys
 import os
 
+def isInt(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
 
 class fpms:
 
     def __init__(self):
         self.probe = ""
         self.gallery = ""
-        self.score = 0
+        self.score = -1
         self.connection = None
 
     def connectDb(self):
@@ -117,6 +123,18 @@ class fpms:
             print("Detection error!")
             print(result)
 
+    def matchFingerprints(self, templateOne, templateTwo):
+        binary = './nbis/bin/bozorth3'
+        arguments = [templateOne, templateTwo]
+        result = self.executeBinary(binary, arguments)
+        if isInt(result):
+            print("Matching Algorithm success!")
+            self.score = int(result)
+            print(self.score)
+        else:
+            print("Matching error!")
+            print(result)
+
 
 if __name__ == '__main__':
     o = fpms()
@@ -124,3 +142,4 @@ if __name__ == '__main__':
     o.readFingerprint("temp.bmp")
     o.compressBMP("temp/temp.bmp")
     o.minutiaeDetect("temp/temp.wsq")
+    o.matchFingerprints("temp/temp.xyt","fpData/B150115CS.xyt")
