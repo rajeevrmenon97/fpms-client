@@ -81,9 +81,7 @@ class fpms:
         finally:
             self.connection.close()
 
-    def readFingerprint(self, fileName):
-        binary = './scanner'
-        arguments = ["temp/" + fileName]
+    def executeBinary(self, binary, arguments):
         cmd = [binary]
         cmd.extend(arguments)
         try:
@@ -91,31 +89,33 @@ class fpms:
         except subprocess.CalledProcessError as exc:
             result = exc.output
         result = result.decode('unicode_escape').rstrip()
+        return result
+
+    def readFingerprint(self, fileName):
+        binary = './scanner'
+        arguments = ["temp/" + fileName]
+        result = self.executeBinary(binary, arguments)
         print(result)
 
     def compressBMP(self, fileName):
         binary = './nbis/bin/cwsq'
         arguments = ["2.25","wsq",fileName, "-raw_in", "320,480,8"]
-        cmd = [binary]
-        cmd.extend(arguments)
-        try:
-            result = subprocess.check_output(cmd)
-        except subprocess.CalledProcessError as exc:
-            result = exc.output
-        result = result.decode('unicode_escape').rstrip()
-        print(result)
+        result = self.executeBinary(binary, arguments)
+        if result is '':
+            print("Compression success!")
+        else:
+            print("Compression error!")
+            print(result)
 
     def minutiaeDetect(self, fileName):
         binary = './nbis/bin/mindtct'
         arguments = ["-m1",fileName, fileName[:-4]]
-        cmd = [binary]
-        cmd.extend(arguments)
-        try:
-            result = subprocess.check_output(cmd)
-        except subprocess.CalledProcessError as exc:
-            result = exc.output
-        result = result.decode('unicode_escape').rstrip()
-        print(result)
+        result = self.executeBinary(binary, arguments)
+        if result is '':
+            print("Detection success!")
+        else:
+            print("Detection error!")
+            print(result)
 
 
 if __name__ == '__main__':
