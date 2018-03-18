@@ -160,10 +160,27 @@ class fpms:
         self.minutiaeDetect("temp/temp.wsq")
         self.templateLineCount = getNumberOfLines("temp/temp.xyt")
 
+    def markAttendance(self):
+        while o.templateLineCount < 35:
+            o.readFingerprint()
+        o.findMatch('temp/temp.xyt')
+        self.connectDb()
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "INSERT INTO `attendance` (`userid`) VALUES (%s)"
+                cursor.execute(sql, (self.matchedID, ))
+            self.connection.commit()
+
+        except Exception as e:
+            print('Error inserting into DB!\n {!r}, errno is {}'.format(e, e.args[0]))
+            exit()
+
+        finally:
+            self.connection.close()
+
+
 
 if __name__ == '__main__':
     o = fpms()
     o.getFingerprintData()
-    while o.templateLineCount < 35:
-        o.readFingerprint()
-    o.findMatch('temp/temp.xyt')
+    o.markAttendance()
