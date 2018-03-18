@@ -1,6 +1,10 @@
+#!bin/python
 import tkinter as tk
+from tkinter import messagebox
 from PIL import ImageTk, Image
-
+from utils import fpms
+import threading
+from multiprocessing import Queue
 
 class GUI(tk.Tk):
 
@@ -41,10 +45,12 @@ class mainWindow(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self,parent)
 
+        self.controller = controller
+
         font = "-family Impact -size 20 -weight normal -slant roman "  \
             "-underline 0 -overstrike 0"
 
-        self.verifyButton = tk.Button(self, command=lambda: controller.show_frame(fpWindow))
+        self.verifyButton = tk.Button(self, command=self.verify )
         self.verifyButton.place(relx=0.33, rely=0.33, height=86, width=177)
         self.verifyButton.configure(activebackground="#d9d9d9")
         self.verifyButton.configure(text='''Verify''')
@@ -60,6 +66,45 @@ class mainWindow(tk.Frame):
         self.title.configure(font=font)
         self.title.configure(text='''Attendance Management System''')
         self.title.configure(width=563)
+        self.threadQueue = Queue()
+
+        self.matchedID = ""
+
+
+    def checkRead(self):
+        if self.threadQueue.empty():
+            self.after(100, self.checkRead)
+        else:
+            ret = self.threadQueue.get(0)
+            if ret is -1:
+                tk.messagebox.showinfo("Error", "Scanner error")
+            elif ret is -2:
+                tk.messagebox.showinfo("Error", "Database error!")
+            elif ret is -3:
+                tk.messagebox.showinfo("Error", "No matching fingerprint found!")
+            elif ret is 0:
+                tk.messagebox.showinfo("Success", "Fingerprint read for " + self.matchedID)
+            self.controller.show_frame(mainWindow)
+
+    def verifyAttendance(self):
+        ret = fpObj.markAttendance()
+        if ret is -1:
+            self.threadQueue.put(-2)
+        elif ret is -2:
+            self.threadQueue.put(-1)
+        elif ret is -3:
+            self.threadQueue.put(-3)
+        else:
+            self.threadQueue.put(0)
+            self.matchedID = fpObj.matchedID
+
+    def verify(self):
+        self.new_thread = threading.Thread(target=self.verifyAttendance)
+        self.new_thread.start()
+        self.after(100, self.checkRead)
+        self.controller.show_frame(fpWindow)
+
+
 
 
 
@@ -134,12 +179,11 @@ class registerWindow(tk.Frame):
         self.backButton.configure(text='''Back''')
         self.backButton.configure(width=147)
 
-
-
 class fpWindow(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
 
         font = "-family Impact -size 15 -weight normal -slant roman "  \
             "-underline 0 -overstrike 0"
@@ -163,5 +207,13 @@ class fpWindow(tk.Frame):
         self.backButton.configure(text='''Home''')
         self.backButton.configure(width=147)
 
-app = GUI()
-app.mainloop()
+
+
+
+if __name__ == "__main__":
+    global fpObj
+    fpObj = fpms()
+    if fpObj.getFingerprintData() is -1:
+        tk.messagebox.showinfo("Error", "Sorry, error occured while connecting")
+    app = GUI()
+    app.mainloop()
