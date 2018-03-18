@@ -170,11 +170,16 @@ class fpms:
         self.minutiaeDetect("temp/temp.wsq")
         self.templateLineCount = getNumberOfLines("temp/temp.xyt")
 
-    def markAttendance(self):
+
+    def getFingerprint(self):
         self.templateLineCount = 0
         while self.templateLineCount < 35:
             if self.readFingerprint() is -1:
                 return -1
+
+    def markAttendance(self):
+        if self.getFingerprint() is -1:
+            return -1
         if self.findMatch('temp/temp.xyt') is -1:
             return -3
         if self.connectDb() is -1:
@@ -193,6 +198,7 @@ class fpms:
 
         finally:
             self.connection.close()
+
 
 
 
