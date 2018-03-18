@@ -141,5 +141,27 @@ class fpWindow(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
+        font = "-family Impact -size 15 -weight normal -slant roman "  \
+            "-underline 0 -overstrike 0"
+
+        image = Image.open("scan.png")
+        image = image.resize((100,100),Image.ANTIALIAS)
+        photo = ImageTk.PhotoImage(image)
+        self.fpImage = tk.Label(self,image=photo)
+        self.fpImage.image = photo
+        self.fpImage.place(relx=0.4, rely=0.22)
+
+        self.title = tk.Message(self)
+        self.title.place(relx=0.15, rely=0.55, relheight=0.2, relwidth=0.69)
+        self.title.configure(font=font)
+        self.title.configure(text='''Place your finger on scanner''')
+        self.title.configure(width=413)
+
+        self.backButton = tk.Button(self, command=lambda: controller.show_frame(mainWindow))
+        self.backButton.place(relx=0.37, rely=0.82, height=46, width=147)
+        self.backButton.configure(activebackground="#d9d9d9")
+        self.backButton.configure(text='''Home''')
+        self.backButton.configure(width=147)
+
 app = GUI()
 app.mainloop()
