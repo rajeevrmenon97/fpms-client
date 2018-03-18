@@ -75,7 +75,7 @@ class fpms:
             return -1
 
         if self.connectDb() is -1:
-            return -1
+            return -2
 
         with open(fpTemplate, 'rb') as f:
             blob = f.read()
@@ -97,7 +97,7 @@ class fpms:
         except Exception as e:
             print('Error inserting into DB!\n {!r}, errno is {}'.format(e, e.args[0]))
             self.connection.close()
-            return -1
+            return -2
 
         finally:
             self.connection.close()
