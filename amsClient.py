@@ -89,9 +89,9 @@ class mainWindow(tk.Frame):
     def verifyAttendance(self):
         ret = fpObj.markAttendance()
         if ret is -1:
-            self.threadQueue.put(-2)
-        elif ret is -2:
             self.threadQueue.put(-1)
+        elif ret is -2:
+            self.threadQueue.put(-2)
         elif ret is -3:
             self.threadQueue.put(-3)
         else:
@@ -99,6 +99,7 @@ class mainWindow(tk.Frame):
             self.matchedID = fpObj.matchedID
 
     def verify(self):
+        self.matchedID = ""
         self.new_thread = threading.Thread(target=self.verifyAttendance)
         self.new_thread.start()
         self.after(100, self.checkRead)
@@ -112,6 +113,7 @@ class registerWindow(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
 
         font = "-family Impact -size 15 -weight normal -slant roman "  \
             "-underline 0 -overstrike 0"
@@ -167,7 +169,7 @@ class registerWindow(tk.Frame):
         self.title.configure(text='''Register''')
         self.title.configure(width=150)
 
-        self.registerButton = tk.Button(self)
+        self.registerButton = tk.Button(self, command=self.getFingerprint)
         self.registerButton.place(relx=0.2, rely=0.82, height=46, width=147)
         self.registerButton.configure(activebackground="#d9d9d9")
         self.registerButton.configure(text='''Register''')
@@ -178,6 +180,47 @@ class registerWindow(tk.Frame):
         self.backButton.configure(activebackground="#d9d9d9")
         self.backButton.configure(text='''Back''')
         self.backButton.configure(width=147)
+
+        self.threadQueue = Queue()
+
+
+    def checkRead(self):
+        if self.threadQueue.empty():
+            self.after(100, self.checkRead)
+        else:
+            ret = self.threadQueue.get(0)
+            if ret is -1:
+                tk.messagebox.showinfo("Error", "Scanner error")
+            elif ret is -2:
+                tk.messagebox.showinfo("Error", "Database error!")
+            elif ret is -3:
+                tk.messagebox.showinfo("Error", "No matching fingerprint found!")
+            elif ret is 0:
+                tk.messagebox.showinfo("Success", "Fingerprint read!")
+
+            fpObj.register(
+                            self.rollno.get(),
+                            self.name.get(),
+                            self.phone.get(),
+                            self.email.get(),
+                            "temp/temp.xyt"
+                          )
+            tk.messagebox.showinfo("Success", "Inserted Data")
+            fpObj.getFingerprintData()
+            self.controller.show_frame(mainWindow)
+
+    def scanFingerprint(self):
+        ret = fpObj.getFingerprint()
+        if ret is -1:
+            self.threadQueue.put(-1)
+        else:
+            self.threadQueue.put(0)
+
+    def getFingerprint(self):
+        self.new_thread = threading.Thread(target=self.scanFingerprint)
+        self.new_thread.start()
+        self.after(100, self.checkRead)
+        self.controller.show_frame(fpWindow)
 
 class fpWindow(tk.Frame):
 
