@@ -39,10 +39,12 @@ class fpms:
                              cursorclass=pymysql.cursors.DictCursor)
         except Exception as e:
             print('Error connecting to db! \n {!r}, errno is {}'.format(e, e.args[0]))
+            return -1
 
     def getFingerprintData(self):
 
-        self.connectDb()
+        if self.connectDb() is -1:
+            return -1
 
         fileList = os.listdir('./fpData')
         for fileName in fileList:
@@ -59,7 +61,8 @@ class fpms:
 
         except Exception as e:
             print('Error getting fingerprint Data! \n {!r}, errno is {}'.format(e, e.args[0]))
-            exit()
+            self.connection.close()
+            return -1
 
         finally:
             self.connection.close()
@@ -69,9 +72,10 @@ class fpms:
         templatePath = Path(fpTemplate)
         if templatePath.is_file() is False:
             print("Cannot find fingerprint template!")
-            exit()
+            return -1
 
-        self.connectDb()
+        if self.connectDb() is -1:
+            return -1
 
         with open(fpTemplate, 'rb') as f:
             blob = f.read()
@@ -92,7 +96,8 @@ class fpms:
 
         except Exception as e:
             print('Error inserting into DB!\n {!r}, errno is {}'.format(e, e.args[0]))
-            exit()
+            self.connection.close()
+            return -1
 
         finally:
             self.connection.close()
@@ -113,6 +118,7 @@ class fpms:
         result = self.executeBinary(binary, arguments)
         if result is not '':
             print(result)
+            return -1
 
     def compressBMP(self, fileName):
         binary = './nbis/bin/cwsq'
@@ -121,7 +127,7 @@ class fpms:
         if result is not '':
             print("Compression error!")
             print(result)
-            exit()
+            return -1
 
     def minutiaeDetect(self, fileName):
         binary = './nbis/bin/mindtct'
@@ -130,7 +136,7 @@ class fpms:
         if result is not '':
             print("Detection error!")
             print(result)
-            exit()
+            return -1
 
     def matchFingerprints(self, templateOne, templateTwo):
         self.score = 0
@@ -141,7 +147,7 @@ class fpms:
             self.score = int(result)
         else:
             print(result)
-            exit()
+            return -1
 
     def findMatch(self, fileName):
         flag = False;
@@ -152,19 +158,27 @@ class fpms:
                 if self.score > 40:
                     self.matchedID = f[:-4]
                     print(self.matchedID)
+                    flag = True
                     break
+        if flag is False:
+            return -1
 
     def readFingerprint(self):
-        self.scanFingerprint("temp.bmp")
+        if self.scanFingerprint("temp.bmp") is -1:
+            return -1
         self.compressBMP("temp/temp.bmp")
         self.minutiaeDetect("temp/temp.wsq")
         self.templateLineCount = getNumberOfLines("temp/temp.xyt")
 
     def markAttendance(self):
-        while o.templateLineCount < 35:
-            o.readFingerprint()
-        o.findMatch('temp/temp.xyt')
-        self.connectDb()
+        self.templateLineCount = 0
+        while self.templateLineCount < 35:
+            if self.readFingerprint() is -1:
+                return -1
+        if self.findMatch('temp/temp.xyt') is -1:
+            return -3
+        if self.connectDb() is -1:
+            return -2
         try:
             with self.connection.cursor() as cursor:
                 sql = "INSERT INTO `attendance` (`userid`) VALUES (%s)"
@@ -172,8 +186,10 @@ class fpms:
             self.connection.commit()
 
         except Exception as e:
+            print("here")
             print('Error inserting into DB!\n {!r}, errno is {}'.format(e, e.args[0]))
-            exit()
+            self.connection.close()
+            return -2
 
         finally:
             self.connection.close()
