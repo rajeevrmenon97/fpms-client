@@ -124,11 +124,11 @@ class registerWindow(tk.Frame):
         self.rollno.configure(font="TkFixedFont")
         self.rollno.configure(width=246)
 
-        self.email = tk.Entry(self)
-        self.email.place(relx=0.3, rely=0.67,height=40, relwidth=0.41)
-        self.email.configure(background="white")
-        self.email.configure(font="TkFixedFont")
-        self.email.configure(selectbackground="#c4c4c4")
+        self.name = tk.Entry(self)
+        self.name.place(relx=0.3, rely=0.4,height=40, relwidth=0.41)
+        self.name.configure(background="white")
+        self.name.configure(font="TkFixedFont")
+        self.name.configure(selectbackground="#c4c4c4")
 
         self.phone = tk.Entry(self)
         self.phone.place(relx=0.3, rely=0.53,height=40, relwidth=0.41)
@@ -136,11 +136,11 @@ class registerWindow(tk.Frame):
         self.phone.configure(font="TkFixedFont")
         self.phone.configure(selectbackground="#c4c4c4")
 
-        self.name = tk.Entry(self)
-        self.name.place(relx=0.3, rely=0.4,height=40, relwidth=0.41)
-        self.name.configure(background="white")
-        self.name.configure(font="TkFixedFont")
-        self.name.configure(selectbackground="#c4c4c4")
+        self.email = tk.Entry(self)
+        self.email.place(relx=0.3, rely=0.67,height=40, relwidth=0.41)
+        self.email.configure(background="white")
+        self.email.configure(font="TkFixedFont")
+        self.email.configure(selectbackground="#c4c4c4")
 
         self.msgRollno = tk.Message(self)
         self.msgRollno.place(relx=0.12, rely=0.28, relheight=0.04, relwidth=0.17)
