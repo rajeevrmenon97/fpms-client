@@ -19,6 +19,13 @@ def getNumberOfLines(fileName):
             pass
     return i + 1
 
+def cleanTemp():
+    dir_name = "temp"
+    dirs = os.listdir(dir_name)
+    for item in dirs:
+        if item.endswith(".bmp") or item.endswith(".brw") or item.endswith(".dm") or item.endswith(".hcm") or item.endswith(".lcm") or item.endswith(".lfm") or item.endswith(".min") or item.endswith(".qm") or item.endswith(".wsq"):
+                os.remove(os.path.join(dir_name, item))
+
 class fpms:
 
     def __init__(self):
@@ -135,6 +142,7 @@ class fpms:
             print("Detection error!")
             print(result)
             return -1
+        cleanTemp()
 
     def matchFingerprints(self, templateOne, templateTwo):
         self.score = 0
@@ -214,4 +222,4 @@ class fpms:
 
 if __name__ == '__main__':
     o = fpms()
-    o.combineTemplates()
+    cleanTemp()
