@@ -5,6 +5,7 @@ from subprocess import STDOUT
 from pathlib import Path
 import sys
 import os
+import re
 
 def isInt(s):
     try:
@@ -146,21 +147,28 @@ class fpms:
 
     def matchFingerprints(self, templateOne, templateTwo):
         self.score = 0
+        self.splitTemplates(templateTwo)
+        scores = None
         binary = './nbis/bin/bozorth3'
-        arguments = [templateOne, templateTwo]
+        galleryFiles = [os.path.join("temp", 'gallery%d.xyt' % i) for i in range(1,6)]
+        arguments = ["-p",templateOne] + galleryFiles
         result = self.executeBinary(binary, arguments)
-        if isInt(result):
-            self.score = int(result)
-        else:
+        scores = re.findall(r'\d+', result)
+        for i in range(len(scores)):
+            scores[i] = int(scores[i])
+        if scores is None or len(scores) is not 5:
             print(result)
             return -1
+        else:
+            self.score = max(scores)
 
     def findMatch(self, fileName):
         flag = False;
         indir = './fpData'
         for root, dirs, filenames in os.walk(indir):
             for f in filenames:
-                self.matchFingerprints(fileName, 'fpData/' + f)
+                if self.matchFingerprints(fileName, 'fpData/' + f) is -1:
+                    return -2
                 if self.score > 40:
                     self.matchedID = f[:-4]
                     print(self.matchedID)
@@ -184,10 +192,13 @@ class fpms:
                 return -1
 
     def markAttendance(self):
-        if self.getFingerprint() is -1:
+        if self.getFingerprint("temp") is -1:
             return -1
-        if self.findMatch('temp/temp.xyt') is -1:
+        ret = self.findMatch('temp/temp.xyt')
+        if  ret is -1:
             return -3
+        elif ret is -2:
+            return -4
         if self.connectDb() is -1:
             return -2
         try:
@@ -210,7 +221,8 @@ class fpms:
         for x in range(1,6):
             with open("temp/temp" + str(x) + ".xyt", 'r') as myfile:
                 data = data + myfile.read()
-                data = data + "<<endoftemplate>>\n"
+                if x is not 5:
+                    data = data + "<<endoftemplate>>\n"
 
         open("temp/temp.xyt","w").close()
         with open("temp/temp.xyt","w") as myfile:
