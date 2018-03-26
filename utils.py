@@ -216,10 +216,20 @@ class fpms:
         with open("temp/temp.xyt","w") as myfile:
             myfile.write(data)
 
+    def splitTemplates(self,fileName):
+        data = ""
+        with open(fileName, "r") as myfile:
+            data = myfile.read()
+
+        for i,template in zip(range(1,6),data.split("\n<<endoftemplate>>\n")):
+            open("temp/gallery" + str(i) + ".xyt", 'w').close()
+            with open("temp/gallery" + str(i) + ".xyt", 'w') as myfile:
+                myfile.write(template)
+
 
 
 
 
 if __name__ == '__main__':
     o = fpms()
-    cleanTemp()
+    o.splitTemplates("fpData/B150115CS.xyt")
