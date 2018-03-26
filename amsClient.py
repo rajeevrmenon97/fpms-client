@@ -82,6 +82,8 @@ class mainWindow(tk.Frame):
                 tk.messagebox.showinfo("Error", "Database error!")
             elif ret is -3:
                 tk.messagebox.showinfo("Error", "No matching fingerprint found!")
+            elif ret is -4:
+                tk.messagebox.showinfo("Error", "Matching error!")
             elif ret is 0:
                 tk.messagebox.showinfo("Success", "Fingerprint read for " + self.matchedID)
             self.controller.show_frame(mainWindow)
@@ -94,6 +96,8 @@ class mainWindow(tk.Frame):
             self.threadQueue.put(-2)
         elif ret is -3:
             self.threadQueue.put(-3)
+        elif ret is -4:
+            self.threadQueue.put(-4)
         else:
             self.threadQueue.put(0)
             self.matchedID = fpObj.matchedID
