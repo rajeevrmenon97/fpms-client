@@ -61,7 +61,6 @@ class fpms:
 
         except Exception as e:
             print('Error getting fingerprint Data! \n {!r}, errno is {}'.format(e, e.args[0]))
-            self.connection.close()
             return -1
 
         finally:
@@ -96,7 +95,6 @@ class fpms:
 
         except Exception as e:
             print('Error inserting into DB!\n {!r}, errno is {}'.format(e, e.args[0]))
-            self.connection.close()
             return -2
 
         finally:
@@ -163,18 +161,18 @@ class fpms:
         if flag is False:
             return -1
 
-    def readFingerprint(self):
-        if self.scanFingerprint("temp.bmp") is -1:
+    def readFingerprint(self,fileName):
+        if self.scanFingerprint(fileName + ".bmp") is -1:
             return -1
-        self.compressBMP("temp/temp.bmp")
-        self.minutiaeDetect("temp/temp.wsq")
-        self.templateLineCount = getNumberOfLines("temp/temp.xyt")
+        self.compressBMP("temp/" + fileName + ".bmp")
+        self.minutiaeDetect("temp/" + fileName + ".wsq")
+        self.templateLineCount = getNumberOfLines("temp/" + fileName + ".xyt")
 
 
-    def getFingerprint(self):
+    def getFingerprint(self,fileName):
         self.templateLineCount = 0
         while self.templateLineCount < 35:
-            if self.readFingerprint() is -1:
+            if self.readFingerprint(fileName) is -1:
                 return -1
 
     def markAttendance(self):
@@ -199,10 +197,21 @@ class fpms:
         finally:
             self.connection.close()
 
+    def combineTemplates(self):
+        data = ""
+        for x in range(1,6):
+            with open("temp/temp" + str(x) + ".xyt", 'r') as myfile:
+                data = data + myfile.read()
+                data = data + "<<endoftemplate>>\n"
+
+        open("temp/temp.xyt","w").close()
+        with open("temp/temp.xyt","w") as myfile:
+            myfile.write(data)
+
+
 
 
 
 if __name__ == '__main__':
     o = fpms()
-    o.getFingerprintData()
-    o.markAttendance()
+    o.combineTemplates()
