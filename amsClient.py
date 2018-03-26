@@ -191,32 +191,35 @@ class registerWindow(tk.Frame):
             ret = self.threadQueue.get(0)
             if ret is -1:
                 tk.messagebox.showinfo("Error", "Scanner error")
-            elif ret is -2:
-                tk.messagebox.showinfo("Error", "Database error!")
-            elif ret is -3:
-                tk.messagebox.showinfo("Error", "No matching fingerprint found!")
-            elif ret is 0:
-                tk.messagebox.showinfo("Success", "Fingerprint read!")
+            elif ret >= 0:
+                tk.messagebox.showinfo("Success", "Fingerprint " + str(ret) + "/5 read!")
 
-            fpObj.register(
-                            self.rollno.get(),
-                            self.name.get(),
-                            self.phone.get(),
-                            self.email.get(),
-                            "temp/temp.xyt"
-                          )
-            tk.messagebox.showinfo("Success", "Inserted Data")
-            fpObj.getFingerprintData()
-            self.controller.show_frame(mainWindow)
+            if ret is 5:
+                fpObj.combineTemplates()
+                fpObj.register(
+                                self.rollno.get(),
+                                self.name.get(),
+                                self.phone.get(),
+                                self.email.get(),
+                                "temp/temp.xyt"
+                                )
+                tk.messagebox.showinfo("Success", "Inserted Data")
+                fpObj.getFingerprintData()
+                self.controller.show_frame(mainWindow)
+            elif ret >= 0:
+                self.getFingerprint(self.fpCount)
+
 
     def scanFingerprint(self):
-        ret = fpObj.getFingerprint()
+        ret = fpObj.getFingerprint("temp" + str(self.fpCount))
         if ret is -1:
             self.threadQueue.put(-1)
         else:
-            self.threadQueue.put(0)
+            self.threadQueue.put(self.fpCount)
+            self.fpCount = self.fpCount + 1
 
-    def getFingerprint(self):
+    def getFingerprint(self, count=1):
+        self.fpCount = count
         self.new_thread = threading.Thread(target=self.scanFingerprint)
         self.new_thread.start()
         self.after(100, self.checkRead)
