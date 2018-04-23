@@ -69,6 +69,7 @@ class mainWindow(tk.Frame):
         self.threadQueue = Queue()
 
         self.matchedID = ""
+        self.matchedName = ""
 
 
     def checkRead(self):
@@ -85,7 +86,7 @@ class mainWindow(tk.Frame):
             elif ret is -4:
                 tk.messagebox.showinfo("Error", "Matching error!")
             elif ret is 0:
-                tk.messagebox.showinfo("Success", "Fingerprint read for " + self.matchedID)
+                tk.messagebox.showinfo("Success", "Fingerprint read for " + self.matchedName)
             self.controller.show_frame(mainWindow)
 
     def verifyAttendance(self):
@@ -101,9 +102,11 @@ class mainWindow(tk.Frame):
         else:
             self.threadQueue.put(0)
             self.matchedID = fpObj.matchedID
+            self.matchedName = fpObj.matchedName
 
     def verify(self):
         self.matchedID = ""
+        self.matchedName = ""
         self.new_thread = threading.Thread(target=self.verifyAttendance)
         self.new_thread.start()
         self.after(100, self.checkRead)

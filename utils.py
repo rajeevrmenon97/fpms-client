@@ -35,13 +35,14 @@ class fpms:
         self.score = -1
         self.connection = None
         self.matchedID = ""
+        self.matchedName = ""
         self.templateLineCount = 0
 
     def connectDb(self):
         try:
-            self.connection = pymysql.connect(host='localhost',
-                             user='root',
-                             password='ssl',
+            self.connection = pymysql.connect(host='192.168.3.111',
+                             user='amsuser',
+                             password='amspassword',
                              db='db_ams',
                              charset='utf8mb4',
                              cursorclass=pymysql.cursors.DictCursor)
@@ -69,6 +70,25 @@ class fpms:
 
         except Exception as e:
             print('Error getting fingerprint Data! \n {!r}, errno is {}'.format(e, e.args[0]))
+            return -1
+
+        finally:
+            self.connection.close()
+
+    def getName(self):
+
+        if self.connectDb() is -1:
+            return -1
+
+        try:
+            with self.connection.cursor() as cursor:
+                sql = "SELECT `name` FROM `registered` WHERE id_no=\'" + self.matchedID + "\'"
+                cursor.execute(sql)
+                result = cursor.fetchone()
+                self.matchedName = result["name"]
+
+        except Exception as e:
+            print('Error getting Name! \n {!r}, errno is {}'.format(e, e.args[0]))
             return -1
 
         finally:
@@ -171,6 +191,7 @@ class fpms:
                     return -2
                 if self.score > 40:
                     self.matchedID = f[:-4]
+                    self.getName()
                     print(self.matchedID)
                     flag = True
                     break
